@@ -9,15 +9,20 @@ import AppBanner from 'amo/components/AppBanner';
 import Footer from 'amo/components/Footer';
 import Header from 'amo/components/Header';
 import WrongPlatformWarning from 'amo/components/WrongPlatformWarning';
+import UnavailableForLegalReasonsPage from 'amo/pages/ErrorPages/UnavailableForLegalReasonsPage';
+import NotFoundPage from 'amo/pages/ErrorPages/NotFoundPage';
 import InfoDialog from 'core/components/InfoDialog';
 import { CLIENT_APP_ANDROID } from 'core/constants';
+import log from 'core/logger';
 import type { AppState } from 'amo/store';
+import type { ErrorHandlerType } from 'core/types/errorHandler';
 import type { ReactRouterLocationType } from 'core/types/router';
 
 import './styles.scss';
 
 type Props = {|
   children: React.Node,
+  errorHandler?: ErrorHandlerType,
   isHomePage?: boolean,
   showWrongPlatformWarning?: boolean,
 |};
@@ -31,10 +36,29 @@ type InternalProps = {|
 export const PageBase = ({
   children,
   clientApp,
+  errorHandler,
   isHomePage = false,
   location,
   showWrongPlatformWarning = true,
 }: InternalProps) => {
+  if (errorHandler && errorHandler.hasError()) {
+    log.warn(`Captured API Error: ${errorHandler.capturedError.messages}`);
+
+    // 401 and 403 for an add-on lookup is made to look like a 404 on purpose.
+    // See https://github.com/mozilla/addons-frontend/issues/3061
+    if (
+      errorHandler.capturedError.responseStatusCode === 401 ||
+      errorHandler.capturedError.responseStatusCode === 403 ||
+      errorHandler.capturedError.responseStatusCode === 404
+    ) {
+      return <NotFoundPage />;
+    }
+
+    if (errorHandler.capturedError.responseStatusCode === 451) {
+      return <UnavailableForLegalReasonsPage />;
+    }
+  }
+
   return (
     <div className="Page-amo">
       <InfoDialog />

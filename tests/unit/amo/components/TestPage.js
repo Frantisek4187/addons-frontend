@@ -4,8 +4,11 @@ import Page, { PageBase } from 'amo/components/Page';
 import AppBanner from 'amo/components/AppBanner';
 import Header from 'amo/components/Header';
 import WrongPlatformWarning from 'amo/components/WrongPlatformWarning';
+import NotFoundPage from 'amo/pages/ErrorPages/NotFoundPage';
+import UnavailableForLegalReasonsPage from 'amo/pages/ErrorPages/UnavailableForLegalReasonsPage';
 import { CLIENT_APP_ANDROID, CLIENT_APP_FIREFOX } from 'core/constants';
 import {
+  createCapturedErrorHandler,
   createContextWithFakeRouter,
   dispatchClientMetadata,
   shallowUntilTarget,
@@ -88,5 +91,33 @@ describe(__filename, () => {
     const root = render({ children });
 
     expect(root.find(`.${className}`)).toHaveLength(1);
+  });
+
+  it('renders NotFound page for missing add-on - 404 error', () => {
+    const errorHandler = createCapturedErrorHandler({ status: 404 });
+
+    const root = render({ errorHandler });
+    expect(root.find(NotFoundPage)).toHaveLength(1);
+  });
+
+  it('renders NotFound page for unauthorized add-on - 401 error', () => {
+    const errorHandler = createCapturedErrorHandler({ status: 401 });
+
+    const root = render({ errorHandler });
+    expect(root.find(NotFoundPage)).toHaveLength(1);
+  });
+
+  it('renders NotFound page for forbidden add-on - 403 error', () => {
+    const errorHandler = createCapturedErrorHandler({ status: 403 });
+
+    const root = render({ errorHandler });
+    expect(root.find(NotFoundPage)).toHaveLength(1);
+  });
+
+  it('renders UnavailableForLegalReasonsPage page for unavailable add-on - 451 error', () => {
+    const errorHandler = createCapturedErrorHandler({ status: 451 });
+
+    const root = render({ errorHandler });
+    expect(root.find(UnavailableForLegalReasonsPage)).toHaveLength(1);
   });
 });
