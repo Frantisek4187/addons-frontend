@@ -29,15 +29,16 @@ export function* fetchVersion({
 
   try {
     const state = yield select(getState);
+    const { api } = state;
 
     const params: GetVersionParams = {
-      api: state.api,
+      api,
       slug,
       versionId,
     };
     const version = yield call(getVersion, params);
 
-    yield put(loadVersions({ slug, versions: [version] }));
+    yield put(loadVersions({ lang: api.lang, slug, versions: [version] }));
   } catch (error) {
     log.warn(`Failed to fetch version: ${error}`);
     yield put(errorHandler.createErrorAction(error));
@@ -53,15 +54,18 @@ export function* fetchVersions({
 
   try {
     const state = yield select(getState);
+    const { api } = state;
 
     const params: GetVersionsParams = {
-      api: state.api,
+      api,
       page,
       slug,
     };
     const versions: GetVersionsResponse = yield call(getVersions, params);
 
-    yield put(loadVersions({ slug, versions: versions.results }));
+    yield put(
+      loadVersions({ lang: api.lang, slug, versions: versions.results }),
+    );
   } catch (error) {
     log.warn(`Failed to fetch versions: ${error}`);
     yield put(errorHandler.createErrorAction(error));

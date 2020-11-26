@@ -5,6 +5,7 @@ import type {
   PartialExternalAddonVersionType,
 } from 'core/reducers/versions';
 import type { AddonTypeType, PromotedCategoryType } from 'core/constants';
+import type { LocalizedString } from 'core/types/api';
 
 export type AddonStatusType =
   | 'lite'
@@ -37,7 +38,7 @@ export type LanguageToolType = {|
   guid: string,
   id: number,
   locale_disambiguation?: string,
-  name: string,
+  name: LocalizedString,
   slug: string,
   target_locale?: string,
   type: string,
@@ -72,13 +73,13 @@ export type ExternalAddonType = {|
   // add-on (status=0) then the current_version could be null.
   current_version?: ExternalAddonVersionType | PartialExternalAddonVersionType,
   default_locale: string,
-  description?: string,
-  developer_comments?: string,
+  description?: LocalizedString,
+  developer_comments?: LocalizedString,
   edit_url?: string,
   guid: string,
   has_eula?: boolean,
   has_privacy_policy?: boolean,
-  homepage?: string,
+  homepage?: LocalizedString,
   icon_url?: string,
   id: number,
   is_disabled?: boolean,
@@ -87,7 +88,7 @@ export type ExternalAddonType = {|
   last_updated: Date | null,
   latest_unlisted_version?: ?ExternalAddonVersionType,
   locale_disambiguation?: string,
-  name: string,
+  name: LocalizedString,
   previews?: Array<Object>,
   promoted: PromotedType | null,
   ratings?: {|
@@ -100,9 +101,9 @@ export type ExternalAddonType = {|
   review_url?: string,
   slug: string,
   status?: AddonStatusType,
-  summary?: string,
-  support_email?: string,
-  support_url?: string,
+  summary?: LocalizedString,
+  support_email?: LocalizedString,
+  support_url?: LocalizedString,
   tags?: Array<string>,
   target_locale?: string,
   type: AddonTypeType,

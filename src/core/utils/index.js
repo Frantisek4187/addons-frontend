@@ -301,3 +301,17 @@ export const findFileForPlatform = ({ userAgentInfo, platformFiles }) => {
   const platform = agentOsName && userAgentOSToPlatform[agentOsName];
   return (platform && platformFiles[platform]) || platformFiles[OS_ALL];
 };
+
+export const getLocalizedString = (localizedStringMap, lang) => {
+  // localizedStringMap could be null.
+  if (!localizedStringMap) {
+    return '';
+  }
+
+  const stringForCurrentLang = localizedStringMap[lang];
+  const langs = Object.keys(localizedStringMap);
+
+  return (
+    stringForCurrentLang || (langs.length && localizedStringMap[langs[0]]) || ''
+  );
+};

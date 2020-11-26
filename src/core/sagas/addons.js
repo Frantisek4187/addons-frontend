@@ -31,11 +31,12 @@ export function* fetchAddon({
 
   try {
     const state = yield select(getState);
+    const { api } = state;
 
-    const params: FetchAddonParams = { api: state.api, slug };
+    const params: FetchAddonParams = { api, slug };
     const addon = yield call(fetchAddonFromApi, params);
 
-    yield put(loadAddon({ addon, slug }));
+    yield put(loadAddon({ addon, lang: api.lang, slug }));
   } catch (error) {
     log.warn(`Failed to load add-on with slug ${slug}: ${error}`);
     yield put(errorHandler.createErrorAction(error));

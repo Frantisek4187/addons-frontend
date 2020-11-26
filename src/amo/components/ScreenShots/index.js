@@ -5,6 +5,7 @@ import * as React from 'react';
 import { PhotoSwipeGallery } from 'react-photoswipe';
 import 'react-photoswipe/lib/photoswipe.css';
 
+import type { LocalizedString } from 'core/types/api';
 import './styles.scss';
 
 type ThumbBounds =
@@ -60,7 +61,7 @@ export const PHOTO_SWIPE_OPTIONS = {
 };
 
 type ExternalPreview = {|
-  caption: string,
+  caption: LocalizedString | null,
   image_size: [number, number],
   image_url: string,
   thumbnail_size: [number, number],

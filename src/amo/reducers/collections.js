@@ -4,6 +4,7 @@ import invariant from 'invariant';
 import { LOCATION_CHANGE } from 'connected-react-router';
 
 import { createInternalAddon } from 'core/reducers/addons';
+import { getLocalizedString } from 'core/utils';
 import type { CollectionAddonType, ExternalAddonType } from 'core/types/addons';
 import type { LocalizedString } from 'core/types/api';
 
@@ -253,20 +254,14 @@ export type ExternalCollectionDetail = {|
     username: string,
   |},
   default_locale: string,
-  description: string | null,
+  description: LocalizedString | null,
   id: number,
   modified: string,
-  name: string,
+  name: LocalizedString,
   public: boolean,
   slug: string,
   url: string,
   uuid: string,
-|};
-
-export type ExternalCollectionDetailWithLocalizedStrings = {|
-  ...ExternalCollectionDetail,
-  description: LocalizedString | null,
-  name: LocalizedString,
 |};
 
 export type CollectionAddonsListResponse = {|
@@ -777,11 +772,12 @@ export const finishEditingCollectionDetails = (): FinishEditingCollectionDetails
 
 export const createInternalAddons = (
   items: ExternalCollectionAddons,
+  lang: string,
 ): Array<CollectionAddonType> => {
   return items.map(({ addon, notes }) => {
     // This allows to have a consistent way to manipulate addons in the app.
     return {
-      ...createInternalAddon(addon),
+      ...createInternalAddon(addon, lang),
       notes,
     };
   });
@@ -825,21 +821,25 @@ export const getCurrentCollection = (
 type CreateInternalCollectionParams = {|
   addonsResponse?: CollectionAddonsListResponse,
   detail: ExternalCollectionDetail,
+  lang: string,
 |};
 
 export const createInternalCollection = ({
   addonsResponse,
   detail,
+  lang,
 }: CreateInternalCollectionParams): CollectionType => ({
-  addons: addonsResponse ? createInternalAddons(addonsResponse.results) : null,
+  addons: addonsResponse
+    ? createInternalAddons(addonsResponse.results, lang)
+    : null,
   authorId: detail.author.id,
   authorName: detail.author.name,
   authorUsername: detail.author.username,
   defaultLocale: detail.default_locale,
-  description: detail.description,
+  description: getLocalizedString(detail.description, lang),
   id: detail.id,
   lastUpdatedDate: detail.modified,
-  name: detail.name || '',
+  name: getLocalizedString(detail.name, lang),
   numberOfAddons: addonsResponse ? addonsResponse.count : detail.addon_count,
   pageSize: addonsResponse ? addonsResponse.page_size : null,
   slug: detail.slug,
@@ -848,18 +848,21 @@ export const createInternalCollection = ({
 type LoadCollectionIntoStateParams = {|
   addonsResponse?: CollectionAddonsListResponse,
   collection: ExternalCollectionDetail,
+  lang: string,
   state: CollectionsState,
 |};
 
 export const loadCollectionIntoState = ({
   addonsResponse,
   collection,
+  lang,
   state,
 }: LoadCollectionIntoStateParams): CollectionsState => {
   const existingCollection = state.byId[collection.id];
   const internalCollection = createInternalCollection({
-    detail: collection,
     addonsResponse,
+    detail: collection,
+    lang,
   });
   // In case the new collection isn't loaded with add-ons,
   // make sure we don't overwrite any existing addons.
@@ -930,35 +933,6 @@ const unloadUserCollections = ({
         loading: false,
       },
     },
-  };
-};
-
-type LocalizeCollectionDetailParams = {|
-  detail: ExternalCollectionDetailWithLocalizedStrings,
-  lang: string,
-|};
-
-export const localizeCollectionDetail = ({
-  detail,
-  lang,
-}: LocalizeCollectionDetailParams): ExternalCollectionDetail => {
-  invariant(detail, 'detail is required for localizeCollectionDetail');
-  invariant(lang, 'lang is required for localizeCollectionDetail');
-
-  // Flow will not allow us to use the spread operator here, so we have
-  // to repeat all the fields.
-  return {
-    addon_count: detail.addon_count,
-    author: detail.author,
-    default_locale: detail.default_locale,
-    description: detail.description ? detail.description[lang] : null,
-    id: detail.id,
-    modified: detail.modified,
-    name: detail.name[lang],
-    public: detail.public,
-    slug: detail.slug,
-    url: detail.url,
-    uuid: detail.uuid,
   };
 };
 

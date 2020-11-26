@@ -17,6 +17,7 @@ import type {
   PartialExternalAddonType,
 } from 'core/types/addons';
 import type { ErrorHandlerType } from 'core/types/errorHandler';
+import { getLocalizedString } from 'core/utils';
 
 export const FETCH_ADDON_INFO: 'FETCH_ADDON_INFO' = 'FETCH_ADDON_INFO';
 export const LOAD_ADDON_INFO: 'LOAD_ADDON_INFO' = 'LOAD_ADDON_INFO';
@@ -84,6 +85,7 @@ export function fetchAddon({
 
 type LoadAddonParams = {|
   addon: ExternalAddonType,
+  lang: string,
   slug: string,
 |};
 
@@ -94,14 +96,16 @@ export type LoadAddonAction = {|
 
 export function loadAddon({
   addon,
+  lang,
   slug,
 }: LoadAddonParams = {}): LoadAddonAction {
   invariant(addon, 'addon is required');
+  invariant(lang, 'lang is required');
   invariant(slug, 'slug is required');
 
   return {
     type: LOAD_ADDON,
-    payload: { addon, slug },
+    payload: { addon, lang, slug },
   };
 }
 
@@ -153,6 +157,7 @@ export const loadAddonInfo = ({
 
 export function createInternalAddon(
   apiAddon: ExternalAddonType | PartialExternalAddonType,
+  lang: string,
 ): AddonType {
   const addon: AddonType = {
     authors: apiAddon.authors,
@@ -162,13 +167,13 @@ export function createInternalAddon(
     contributions_url: apiAddon.contributions_url,
     created: apiAddon.created,
     default_locale: apiAddon.default_locale,
-    description: apiAddon.description,
-    developer_comments: apiAddon.developer_comments,
+    description: getLocalizedString(apiAddon.description, lang),
+    developer_comments: getLocalizedString(apiAddon.developer_comments, lang),
     edit_url: apiAddon.edit_url,
     guid: apiAddon.guid,
     has_eula: apiAddon.has_eula,
     has_privacy_policy: apiAddon.has_privacy_policy,
-    homepage: apiAddon.homepage,
+    homepage: getLocalizedString(apiAddon.homepage, lang),
     icon_url: apiAddon.icon_url,
     id: apiAddon.id,
     is_disabled: apiAddon.is_disabled,
@@ -177,7 +182,7 @@ export function createInternalAddon(
     last_updated: apiAddon.last_updated,
     latest_unlisted_version: apiAddon.latest_unlisted_version,
     locale_disambiguation: apiAddon.locale_disambiguation,
-    name: apiAddon.name,
+    name: getLocalizedString(apiAddon.name, lang),
     previews: apiAddon.previews,
     promoted: apiAddon.promoted,
     ratings: apiAddon.ratings,
@@ -185,9 +190,9 @@ export function createInternalAddon(
     review_url: apiAddon.review_url,
     slug: apiAddon.slug,
     status: apiAddon.status,
-    summary: apiAddon.summary,
-    support_email: apiAddon.support_email,
-    support_url: apiAddon.support_url,
+    summary: getLocalizedString(apiAddon.summary, lang),
+    support_email: getLocalizedString(apiAddon.support_email, lang),
+    support_url: getLocalizedString(apiAddon.support_url, lang),
     tags: apiAddon.tags,
     target_locale: apiAddon.target_locale,
     type: apiAddon.type,
@@ -320,7 +325,7 @@ export default function addonsReducer(
     }
 
     case LOAD_ADDON: {
-      const { addon: loadedAddon, slug } = action.payload;
+      const { addon: loadedAddon, lang, slug } = action.payload;
 
       const byID = { ...state.byID };
       const byGUID = { ...state.byGUID };
@@ -328,7 +333,7 @@ export default function addonsReducer(
       const byIdInURL = { ...state.byIdInURL };
       const loadingByIdInURL = { ...state.loadingByIdInURL };
 
-      const addon = createInternalAddon(loadedAddon);
+      const addon = createInternalAddon(loadedAddon, lang);
       // Flow wants hash maps with string keys.
       // See: https://zhenyong.github.io/flowtype/docs/objects.html#objects-as-maps
       byID[`${addon.id}`] = addon;

@@ -21,10 +21,11 @@ import {
 import log from 'core/logger';
 import { LOAD_ADDON } from 'core/reducers/addons';
 import { SEARCH_LOADED } from 'core/reducers/search';
-import { findFileForPlatform } from 'core/utils';
+import { findFileForPlatform, getLocalizedString } from 'core/utils';
 import { formatFilesize } from 'core/i18n/utils';
 import type { UserAgentInfoType } from 'core/reducers/api';
 import type { AddonStatusType } from 'core/types/addons';
+import type { LocalizedString } from 'core/types/api';
 import type { I18nType } from 'core/types/i18n';
 
 export const FETCH_VERSION: 'FETCH_VERSION' = 'FETCH_VERSION';
@@ -79,7 +80,7 @@ export type PartialExternalAddonVersionType = {|
 |};
 
 type PartialVersionLicenseType = {|
-  name: string | null,
+  name: LocalizedString | null,
   text?: string,
   url: string,
 |};
@@ -157,6 +158,7 @@ export const createPlatformFiles = (
 
 export const createInternalVersion = (
   version: ExternalAddonVersionType,
+  lang: string,
 ): AddonVersionType => {
   return {
     compatibility: version.compatibility,
@@ -167,7 +169,7 @@ export const createInternalVersion = (
     license: version.license
       ? {
           isCustom: version.license.is_custom,
-          name: version.license.name,
+          name: getLocalizedString(version.license.name, lang),
           text: version.license.text,
           url: version.license.url,
         }
@@ -230,6 +232,7 @@ export const fetchVersions = ({
 };
 
 type LoadVersionsParams = {|
+  lang: string,
   slug: string,
   versions: Array<ExternalAddonVersionType>,
 |};
@@ -240,15 +243,17 @@ type LoadVersionsAction = {|
 |};
 
 export const loadVersions = ({
+  lang,
   slug,
   versions,
 }: LoadVersionsParams = {}): LoadVersionsAction => {
+  invariant(lang, 'lang is required');
   invariant(slug, 'slug is required');
   invariant(versions, 'versions is required');
 
   return {
     type: LOAD_VERSIONS,
-    payload: { slug, versions },
+    payload: { lang, slug, versions },
   };
 };
 
@@ -393,11 +398,11 @@ const reducer = (
     }
 
     case LOAD_VERSIONS: {
-      const { slug, versions } = action.payload;
+      const { lang, slug, versions } = action.payload;
 
       const newVersions = {};
       for (const version of versions) {
-        newVersions[version.id] = createInternalVersion(version);
+        newVersions[version.id] = createInternalVersion(version, lang);
       }
 
       return {

@@ -21,7 +21,6 @@ import collectionsReducer, {
   loadCurrentCollection,
   loadCurrentCollectionPage,
   loadUserCollections,
-  localizeCollectionDetail,
   removeAddonFromCollection,
   unloadCollectionBySlug,
   updateCollection,
@@ -658,10 +657,7 @@ describe(__filename, () => {
         _createCollection(params);
 
         const expectedLoadAction = loadCurrentCollection({
-          detail: localizeCollectionDetail({
-            detail: collectionDetailResponse,
-            lang: state.api.lang,
-          }),
+          detail: collectionDetailResponse,
         });
 
         const loadAction = await sagaTester.waitFor(expectedLoadAction.type);

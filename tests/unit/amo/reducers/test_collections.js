@@ -28,7 +28,6 @@ import reducer, {
   loadCurrentCollection,
   loadCurrentCollectionPage,
   loadUserCollections,
-  localizeCollectionDetail,
   removeAddonFromCollection,
   unloadCollectionBySlug,
   updateCollection,
@@ -969,24 +968,6 @@ describe(__filename, () => {
           addonsResponse: collection1Addons,
         }),
       );
-    });
-  });
-
-  describe('localizeCollectionDetail', () => {
-    it('localizes collection detail', () => {
-      const lang = 'en-US';
-      const collectionDetail = createFakeCollectionDetail();
-      const collectionDetailWithLocalizedStrings = {
-        ...collectionDetail,
-        description: { [lang]: collectionDetail.description },
-        name: { [lang]: collectionDetail.name },
-      };
-      const localizedDetail = localizeCollectionDetail({
-        detail: collectionDetailWithLocalizedStrings,
-        lang,
-      });
-
-      expect(localizedDetail).toEqual(collectionDetail);
     });
   });
 
